@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introduction to uv</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+<style>
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
+
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
+
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  .reveal .slide-footer { display: none; }
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
+
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+
+<!-- ═══════════════════════════════ SLIDE 01 — TITLE ═══════════════════════════════ -->
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="text-align:left; max-width:820px; margin:0 auto; padding: 1em 0;">
+    <div style="font-family:'JetBrains Mono',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">
+      TECHNICAL PRESENTATION
+    </div>
+    <h1>Introduction to<br>uv</h1>
+    <div class="subtitle">An extremely fast Python package &amp; project manager, written in Rust</div>
+    <div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
+    <div style="display:flex; gap:1.2em; flex-wrap:wrap; margin-bottom:1em;">
+      <span class="pill amber">Astral</span>
+      <span class="pill green">Rust</span>
+      <span class="pill purple">PEP 723</span>
+      <span class="pill blue">Workspaces</span>
+    </div>
+    <div class="ss-row" style="margin-top:0.6em;">
+      <span class="ss-node active">🐍 Python</span>
+      <span class="ss-arrow">→</span>
+      <span class="ss-node active">📦 venv</span>
+      <span class="ss-arrow">→</span>
+      <span class="ss-node active">🔒 lock</span>
+      <span class="ss-arrow">→</span>
+      <span class="ss-node active">⚙️ sync</span>
+      <span class="ss-arrow">→</span>
+      <span class="ss-node done">▶ run</span>
+      <span class="ss-arrow">→</span>
+      <span class="ss-node done">🚀 publish</span>
+    </div>
+    <p style="max-width:620px; color:#a0a0c0; font-size:.56em; line-height:1.5; margin-top:1em;">
+      One tool to replace pip, pip-tools, pipx, poetry, pyenv, virtualenv, twine, and more — 10–100× faster than the originals.
+    </p>
+    <div class="meta" style="margin-top:1.4em;">
+      Resolve &nbsp;·&nbsp; Lock &nbsp;·&nbsp; Sync &nbsp;·&nbsp; Run
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 02 — TOPICS ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">01</span>
+    <h2>Topics</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Foundations</h3>
+        <ul>
+          <li>What uv is — Astral, Rust, the consolidation pitch</li>
+          <li>Installation and the first <code>uv pip</code> command</li>
+          <li>Virtual environments with <code>uv venv</code></li>
+          <li>Starting a project with <code>uv init</code></li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-top:0.5em;">
+        <h3 class="g">Project workflow</h3>
+        <ul>
+          <li><code>pyproject.toml</code>, <code>uv add</code>, <code>uv remove</code></li>
+          <li>The universal <code>uv.lock</code> file</li>
+          <li><code>uv sync</code> — install &amp; reconcile</li>
+          <li><code>uv run</code> — auto-sync &amp; execute</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Power features</h3>
+        <ul>
+          <li>Managing Python versions — <code>uv python</code></li>
+          <li>PEP 723 inline-script dependencies</li>
+          <li><code>uvx</code> for one-shot CLI tools</li>
+          <li>Workspaces &amp; dependency groups</li>
+          <li>Build &amp; publish to PyPI</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.5em;">
+        <h3 class="b">Adoption &amp; performance</h3>
+        <ul>
+          <li>Performance internals — cache, hardlinks, PubGrub</li>
+          <li>pip / poetry / pdm / Hatch comparison</li>
+          <li>Migration from <code>requirements.txt</code> / Poetry</li>
+          <li>CI patterns and gotchas</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 03 — WHAT IS UV ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">02</span>
+    <h2>What Is uv?</h2>
+  </div>
+  <p><span class="a">uv</span> is a single Rust-based binary that handles every step of the Python packaging lifecycle — installing the interpreter, creating environments, resolving and locking dependencies, running scripts, building wheels, and publishing them.</p>
+
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Origin &amp; status</h3>
+        <ul>
+          <li>Built by <span class="a">Astral</span> — same team as <code>ruff</code></li>
+          <li>First released February 2024; 1.0 entered the project-manager era in late 2024</li>
+          <li>Apache 2.0 / MIT dual-licensed, fully open source</li>
+          <li>Single static Rust binary — no Python bootstrap required</li>
+          <li>Backed by Astral's commercial roadmap, but every feature is in the open-source core</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">What uv replaces</h3>
+        <ul>
+          <li><span class="a">pip</span> — package install / uninstall</li>
+          <li><span class="a">pip-tools</span> — <code>pip-compile</code>, <code>pip-sync</code></li>
+          <li><span class="a">virtualenv</span> / <code>python -m venv</code></li>
+          <li><span class="a">pipx</span> — run / install standalone CLIs</li>
+          <li><span class="a">pyenv</span> — install &amp; switch CPython builds</li>
+          <li><span class="a">poetry</span> / <span class="a">pdm</span> / <span class="a">Hatch</span> — project &amp; lockfile workflow</li>
+          <li><span class="a">twine</span> / <code>build</code> — build &amp; publish to PyPI</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="card blue" style="margin-top:0.4em;">
+    <p>The pitch: <em>"the Cargo of Python"</em> — one fast tool, one config file, one lockfile, no plugin sprawl.</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 04 — WHY UV ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">03</span>
+    <h2>Why uv? — Speed &amp; Consolidation</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Speed (typical, cold cache → warm)</h3>
+        <table>
+          <thead><tr><th>Operation</th><th>pip</th><th>uv</th></tr></thead>
+          <tbody>
+            <tr><td>Resolve <code>transformers</code> + extras</td><td>~30 s</td><td>~0.4 s</td></tr>
+            <tr><td>Install Django + tree</td><td>~7 s</td><td>~0.2 s</td></tr>
+            <tr><td><code>poetry lock</code> on a medium project</td><td>~25 s</td><td>~0.3 s</td></tr>
+            <tr><td>Re-create venv from cache</td><td>~3 s</td><td>~50 ms</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:.3em;">Measured by Astral; varies by network. <span class="g">10–100×</span> over pip is the rule, not the exception.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Where the speed comes from</h3>
+        <ul>
+          <li><span class="a">Rust</span> + zero-copy parsing + parallel HTTP</li>
+          <li><span class="a">PubGrub</span> resolver with conflict-driven backtracking</li>
+          <li><span class="a">Global content-addressed cache</span> shared across every project</li>
+          <li><span class="a">Hardlinks / reflinks</span> from cache into venvs — install is essentially <code>ln</code></li>
+          <li>Aggressive use of HTTP range requests against PyPI's metadata index</li>
+        </ul>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Beyond speed</h3>
+        <ul>
+          <li>One binary, one config, one lockfile — drop-in for hostile CI containers</li>
+          <li>Universal lockfile resolves for every platform / Python version at once</li>
+          <li>Scripts can declare dependencies (<span class="g">PEP 723</span>) — no project required</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 05 — INSTALLATION ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">04</span>
+    <h2>Installation</h2>
+  </div>
+  <p>uv is distributed as a <span class="a">single static binary</span>. No Python required — uv can install Python for you.</p>
+  <div class="cols cols-3" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Standalone installer</h3>
+        <pre><code># macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# pin a version
+curl -LsSf https://astral.sh/uv/0.5.0/install.sh | sh</code></pre>
+      </div>
+      <div class="card green" style="margin-top:.4em;">
+        <h3 class="g">Package managers</h3>
+        <pre><code>brew install uv          # macOS
+winget install astral-sh.uv
+pacman -S uv             # Arch
+pipx install uv          # if pipx already there
+pip install uv           # last resort</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Docker</h3>
+        <pre><code># Astral's slim image
+FROM ghcr.io/astral-sh/uv:0.5-python3.12-bookworm-slim
+
+# or copy the binary
+COPY --from=ghcr.io/astral-sh/uv:latest \
+     /uv /uvx /usr/local/bin/</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:.4em;">
+        <h3 class="b">Self-update</h3>
+        <pre><code>uv self update
+uv self update --version 0.5.4
+uv --version</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3 class="a">First sanity check</h3>
+        <pre><code>$ uv --version
+uv 0.5.4
+
+$ uv python list
+cpython-3.13.0-linux-x86_64-gnu
+cpython-3.12.7-linux-x86_64-gnu
+cpython-3.11.10-linux-x86_64-gnu
+...
+
+$ uv pip list
+Package    Version
+---------- -------
+(empty system pip-compatible view)</code></pre>
+      </div>
+      <div class="card red" style="margin-top:.4em;">
+        <h3 class="r">Tip</h3>
+        <p>Install via the standalone installer in CI — it does not depend on a working Python. Pin the version in production: <code>UV_VERSION=0.5.4</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 06 — UV PIP ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">05</span>
+    <h2>uv pip — Drop-In Replacement</h2>
+  </div>
+  <p><code>uv pip</code> mirrors the pip CLI surface. <span class="g">Faster, no behavioural changes</span> — switch in seconds for legacy projects.</p>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Same commands, faster</h3>
+        <pre><code># classic pip
+pip install requests
+pip install -r requirements.txt
+pip freeze &gt; requirements.txt
+pip install -e .
+pip uninstall flask
+
+# uv equivalent — same flags
+uv pip install requests
+uv pip install -r requirements.txt
+uv pip freeze &gt; requirements.txt
+uv pip install -e .
+uv pip uninstall flask</code></pre>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Compile &amp; sync (replaces pip-tools)</h3>
+        <pre><code># produce a fully-pinned requirements file
+uv pip compile requirements.in -o requirements.txt
+
+# sync the venv to exactly match
+uv pip sync requirements.txt
+
+# add hashes for supply-chain integrity
+uv pip compile requirements.in \
+  --generate-hashes -o requirements.txt</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">When to use <code>uv pip</code> vs <code>uv add</code></h3>
+        <ul>
+          <li><span class="a">uv pip</span> = imperative, ad-hoc, no <code>pyproject.toml</code> required — perfect for legacy <code>requirements.txt</code> repos and one-off venvs.</li>
+          <li><span class="g">uv add</span> = declarative project workflow — edits <code>pyproject.toml</code> and updates <code>uv.lock</code>.</li>
+          <li>Use <code>uv pip</code> as the on-ramp. Migrate to <code>uv add</code> when you want a lockfile.</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Useful pip-mode flags</h3>
+        <pre><code>uv pip install \
+  --index-url https://pypi.org/simple \
+  --extra-index-url https://internal/index \
+  --python /usr/bin/python3.11 \
+  --system        \
+  --no-cache      \
+  --offline       \
+  package==1.2.*</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 07 — UV VENV ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">06</span>
+    <h2>uv venv — Virtual Environments</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Create &amp; activate</h3>
+        <pre><code># defaults to .venv
+uv venv
+
+# pick a version
+uv venv --python 3.12
+uv venv --python 3.12.4
+uv venv --python pypy@3.10
+
+# pick a path
+uv venv ~/envs/scratch
+
+# activate (still POSIX as ever)
+source .venv/bin/activate
+.\.venv\Scripts\activate    # Windows</code></pre>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">You usually don't need to activate</h3>
+        <p>Every <code>uv pip</code>, <code>uv run</code>, <code>uv add</code> auto-discovers <code>.venv</code> in the current directory. The only reason to <code>source</code> is for ad-hoc <code>python</code> / <code>pytest</code> calls in your shell.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">How fast is venv creation?</h3>
+        <ul>
+          <li><code>python -m venv</code>: ~3–5 s (copies CPython, runs ensurepip)</li>
+          <li><code>uv venv</code>: <span class="g">~50 ms</span> — uses managed Python and skips ensurepip</li>
+          <li>Throwaway venvs become genuinely cheap — useful in tests, hooks, ephemeral CI containers</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Seed packages</h3>
+        <pre><code># by default the venv has no pip!
+uv venv
+
+# add the legacy seed if you really need it
+uv venv --seed   # installs pip, setuptools, wheel</code></pre>
+        <p>uv installs straight into <code>site-packages</code>, so pip-in-venv is mostly vestigial. Only enable seeding when external tools insist on calling <code>pip</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 08 — UV INIT ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">07</span>
+    <h2>uv init — Starting a Project</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Create a new project</h3>
+        <pre><code>$ uv init my-app
+Initialized project `my-app` at /tmp/my-app
+
+$ tree -a my-app
+my-app/
+├── .gitignore
+├── .python-version       # pinned Python (e.g. 3.12)
+├── README.md
+├── main.py               # hello-world entry
+└── pyproject.toml
+
+# init in-place
+uv init --name my-app .
+
+# library scaffold (with src/)
+uv init --lib mylib
+
+# application scaffold (default)
+uv init --app my-cli
+
+# packaged (build-system + entry points)
+uv init --package my-tool</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Scaffold types</h3>
+        <ul>
+          <li><span class="a">--app</span> (default) — flat layout, no build system</li>
+          <li><span class="g">--lib</span> — <code>src/</code> layout, Hatch build system, ready for PyPI</li>
+          <li><span class="p">--package</span> — application that should be pip-installable, with console scripts</li>
+        </ul>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">First commands</h3>
+        <pre><code>cd my-app
+uv add requests           # creates .venv + uv.lock
+uv run main.py            # runs in synced env
+uv run python -V          # 3.12.x</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b"><code>.python-version</code></h3>
+        <p>A plain text file naming the required Python. Honoured by uv, pyenv, and most IDEs. Commit it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 09 — PYPROJECT ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">08</span>
+    <h2>pyproject.toml — Source of Truth</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Anatomy of a uv-managed project</h3>
+        <pre><code>[project]
+name = "my-app"
+version = "0.1.0"
+description = "Example service"
+readme = "README.md"
+requires-python = "&gt;=3.11"
+authors = [
+  { name = "Brendan Lynskey",
+    email = "you@example.com" }
+]
+dependencies = [
+  "fastapi&gt;=0.115",
+  "httpx&gt;=0.27",
+  "pydantic&gt;=2.8",
+]
+
+[project.optional-dependencies]
+postgres = ["asyncpg&gt;=0.29"]
+
+[dependency-groups]
+dev = [
+  "pytest&gt;=8",
+  "ruff&gt;=0.6",
+  "mypy&gt;=1.10",
+]
+
+[tool.uv]
+package = true            # install in editable mode</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g"><code>dependencies</code> vs groups vs extras</h3>
+        <ul>
+          <li><span class="a">dependencies</span> — runtime, always installed</li>
+          <li><span class="g">[project.optional-dependencies]</span> — extras users opt into when installing your package: <code>pip install my-app[postgres]</code></li>
+          <li><span class="p">[dependency-groups]</span> — dev-only groups (PEP 735). Never published, only synced locally / in CI.</li>
+        </ul>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Version specifiers — quick reference</h3>
+        <table>
+          <thead><tr><th>Spec</th><th>Means</th></tr></thead>
+          <tbody>
+            <tr><td><code>requests</code></td><td>any version</td></tr>
+            <tr><td><code>requests==2.31</code></td><td>exactly</td></tr>
+            <tr><td><code>requests~=2.31</code></td><td>compatible (≥ 2.31, &lt; 3.0)</td></tr>
+            <tr><td><code>requests&gt;=2.0,&lt;3</code></td><td>range</td></tr>
+            <tr><td><code>requests; sys_platform != "win32"</code></td><td>marker</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 10 — UV ADD/REMOVE ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">09</span>
+    <h2>uv add / uv remove</h2>
+  </div>
+  <p>The everyday verbs. Each call edits <code>pyproject.toml</code>, refreshes <code>uv.lock</code>, and syncs the venv — atomically.</p>
+  <div class="cols cols-2" style="margin-top:0.4em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Adding</h3>
+        <pre><code># runtime deps
+uv add fastapi httpx
+
+# version pin
+uv add 'pydantic&gt;=2.8,&lt;3'
+
+# dev-group dependency
+uv add --group dev pytest ruff mypy
+
+# extras (optional dep)
+uv add --optional postgres asyncpg
+
+# from a local path / git / URL
+uv add ./libs/internal-utils
+uv add 'git+https://github.com/foo/bar@main'
+uv add 'https://files.pythonhosted.org/packages/.../wheel.whl'
+
+# editable
+uv add --editable ./libs/internal-utils</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Removing &amp; upgrading</h3>
+        <pre><code># remove
+uv remove httpx
+uv remove --group dev pytest
+
+# upgrade everything within constraints
+uv lock --upgrade
+
+# upgrade just one package
+uv lock --upgrade-package fastapi
+
+# upgrade across a major boundary by editing
+# pyproject.toml then re-locking
+sed -i 's/pydantic&gt;=2.8/pydantic&gt;=3/' pyproject.toml
+uv lock</code></pre>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">What changes on disk</h3>
+        <ul>
+          <li><code>pyproject.toml</code> — adds the dependency line in the right table</li>
+          <li><code>uv.lock</code> — re-resolves; the diff is your audit trail</li>
+          <li><code>.venv</code> — installed/removed via hardlinks from cache</li>
+        </ul>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Tip</h3>
+        <p>Commit <code>pyproject.toml</code> and <code>uv.lock</code> together. Reviewers can see both intent and effect in one diff.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 11 — UV.LOCK ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">10</span>
+    <h2>The Lockfile — uv.lock</h2>
+  </div>
+  <p><code>uv.lock</code> is a <span class="a">universal, cross-platform, multi-Python lockfile</span>. One file pins your project for Linux x86, Linux arm64, macOS arm64, Windows, and every supported Python version simultaneously.</p>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Excerpt</h3>
+        <pre><code>version = 1
+requires-python = "&gt;=3.11"
+
+[[package]]
+name = "fastapi"
+version = "0.115.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "starlette" },
+]
+sdist = { url = "...", hash = "sha256:abc..." }
+wheels = [
+    { url = "...py3-none-any.whl",
+      hash = "sha256:def..." },
+]
+
+[[package]]
+name = "pydantic"
+version = "2.9.2"
+...</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Why universal matters</h3>
+        <ul>
+          <li>Mac developer machine, Linux containers, Windows build agent — same lockfile</li>
+          <li>Resolves once across all platforms; per-platform conditional wheels recorded in the same file</li>
+          <li>Compare to Poetry: cross-platform but not multi-Python; pip-tools: per-platform requirements files</li>
+        </ul>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Reproducibility flags</h3>
+        <pre><code># refuse to update the lock — fail if it's out of date
+uv sync --frozen
+uv sync --locked    # alias
+
+# ignore lock and re-resolve from pyproject
+uv sync --no-lock</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">In CI</h3>
+        <p><span class="a">Always</span> run <code>uv sync --frozen</code>. If the lockfile is stale the build fails immediately — the way it should.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 12 — UV SYNC ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">11</span>
+    <h2>uv sync — Reconcile the Environment</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">What sync does</h3>
+        <ol>
+          <li>Ensure <code>uv.lock</code> matches <code>pyproject.toml</code> (re-lock if not)</li>
+          <li>Ensure <code>.venv</code> exists with the right Python</li>
+          <li>Install / upgrade / remove packages so <code>.venv</code> matches the lock <em>exactly</em></li>
+          <li>Remove anything in the venv that is not in the lock</li>
+        </ol>
+        <p style="margin-top:.3em;"><span class="g">It is idempotent.</span> Running it twice is essentially free.</p>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Common flag combinations</h3>
+        <pre><code>uv sync                       # default groups
+uv sync --all-groups          # everything dev + extras
+uv sync --no-dev              # production install
+uv sync --extra postgres      # one extra
+uv sync --group docs          # one dev group
+uv sync --frozen              # CI / reproducible
+uv sync --reinstall           # nuke and rebuild
+uv sync --reinstall-package torch</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Performance: the second-sync is free</h3>
+        <pre><code>$ time uv sync          # cold
+real    0m1.245s
+$ time uv sync          # warm
+real    0m0.034s        # nothing to do</code></pre>
+        <p>Because uv hashes the lock + venv state, a clean sync becomes a 30 ms no-op. CI pipelines can <code>uv sync</code> at the start of every job without paying for it.</p>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Production install</h3>
+        <pre><code># inside a Docker stage
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy
+RUN uv sync --frozen --no-dev</code></pre>
+        <ul>
+          <li><code>--no-dev</code> drops dev groups</li>
+          <li><code>UV_COMPILE_BYTECODE</code> precompiles <code>.pyc</code></li>
+          <li><code>UV_LINK_MODE=copy</code> avoids hardlink issues across volumes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 13 — UV RUN ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">12</span>
+    <h2>uv run — Execute in the Project Env</h2>
+  </div>
+  <p><code>uv run</code> auto-syncs the environment, then exec's the command inside it. <span class="g">No activation, no <code>poetry shell</code></span>.</p>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Everyday usage</h3>
+        <pre><code>uv run python main.py
+uv run pytest -q
+uv run ruff check .
+uv run mypy src/
+uv run ipython
+uv run python -c 'import torch; print(torch.__version__)'
+
+# with extra runtime deps not in the project
+uv run --with rich --with httpx python -c \
+  'from rich import print; print({"hi": 1})'
+
+# pin a Python different from .python-version
+uv run --python 3.13 pytest</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Console scripts</h3>
+        <p>Define entry points in <code>pyproject.toml</code>, then <code>uv run</code> calls them by name.</p>
+        <pre><code>[project.scripts]
+serve = "myapp.cli:main"
+
+# now
+uv run serve</code></pre>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Behaviour cheatsheet</h3>
+        <ul>
+          <li>Re-syncs the venv unless <code>--no-sync</code></li>
+          <li>Sets <code>VIRTUAL_ENV</code>, <code>PATH</code>, <code>PYTHONPATH</code> for the child process</li>
+          <li>Refuses to run if the lock is out-of-date and <code>--frozen</code> is set</li>
+          <li>Inherits stdin/stdout — works for REPLs, debuggers, dashboards</li>
+        </ul>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Pitfall</h3>
+        <p><code>uv run python</code> is not the same as a previously-activated Python. If you've manually <code>source</code>'d the venv, drop the <code>uv run</code> prefix to avoid double activation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 14 — PYTHON VERSIONS ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">13</span>
+    <h2>Managing Python Versions</h2>
+  </div>
+  <p>uv ships its own Python distribution manager — replacing pyenv, deadsnakes, and the official installers.</p>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Install &amp; list</h3>
+        <pre><code>uv python list                # installed + downloadable
+uv python list --only-installed
+uv python install 3.12.7
+uv python install 3.11 3.12 3.13
+uv python install 'cpython-3.12.7-linux-x86_64-gnu'
+uv python install pypy@3.10
+
+# uninstall
+uv python uninstall 3.11
+
+# show where one lives
+uv python find 3.12</code></pre>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Pinning</h3>
+        <pre><code># write/update .python-version
+uv python pin 3.12
+
+# uses the project's .python-version
+uv venv
+
+# override per command
+uv run --python 3.13 pytest</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">How is this so fast?</h3>
+        <ul>
+          <li>uv pulls <span class="a">python-build-standalone</span> — relocatable, statically-linked CPython tarballs (Indygreg / Astral, ~25 MB)</li>
+          <li>No compilation — just download and untar</li>
+          <li>Cached in <code>~/.local/share/uv/python/</code> and shared across every project</li>
+          <li>Works on locked-down corp laptops where you can't <code>apt install python3.12</code></li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">System Python vs uv Python</h3>
+        <ul>
+          <li>uv prefers its managed builds for project venvs</li>
+          <li><code>--system</code> opts back to the OS interpreter (rare; mostly Docker)</li>
+          <li><code>UV_PYTHON_PREFERENCE=only-system</code> if your security policy forbids downloading interpreters</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 15 — PEP 723 ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">14</span>
+    <h2>PEP 723 — Inline Script Dependencies</h2>
+  </div>
+  <p>Single-file scripts can declare their dependencies <em>inside the script</em>. uv reads the metadata, builds an ephemeral venv, runs the script.</p>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">A real, runnable example</h3>
+        <pre><code>#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = "&gt;=3.12"
+# dependencies = [
+#   "httpx&gt;=0.27",
+#   "rich&gt;=13",
+# ]
+# ///
+import httpx
+from rich import print
+
+r = httpx.get("https://api.github.com/zen")
+print(f"[bold green]GitHub says:[/] {r.text}")</code></pre>
+        <pre><code>$ chmod +x zen.py
+$ ./zen.py
+GitHub says: Practicality beats purity.</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Why this is huge</h3>
+        <ul>
+          <li>No <code>pyproject.toml</code>, no venv, no <code>requirements.txt</code></li>
+          <li>One-file scripts that <em>actually run</em> on a colleague's machine</li>
+          <li>Replaces a lot of "I made you a notebook"</li>
+          <li>Perfect for ops scripts, CI helpers, code-review demos</li>
+        </ul>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Tooling commands</h3>
+        <pre><code># add a dep to a script's PEP 723 block
+uv add --script zen.py "click&gt;=8"
+
+# pin Python
+uv add --script zen.py --python 3.13
+
+# lock script deps separately (optional)
+uv lock --script zen.py</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Standard, not Astral-only</h3>
+        <p>PEP 723 is an accepted Python standard. Hatch, pdm, and pipx implement it too — your script stays portable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 16 — UVX / TOOL ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">15</span>
+    <h2>uvx &amp; uv tool — Replacing pipx</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">One-shot CLI execution</h3>
+        <pre><code># run a CLI without installing it
+uvx ruff check .
+uvx black .
+uvx pre-commit run --all-files
+uvx httpie GET https://example.com
+
+# specific version
+uvx ruff@0.6.9 check .
+
+# from git
+uvx --from 'git+https://github.com/foo/bar' baz
+
+# pass extras / extra deps
+uvx --with pandas streamlit run app.py</code></pre>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Persistent install (replaces pipx install)</h3>
+        <pre><code>uv tool install ruff
+uv tool install ruff@0.6.9
+uv tool install pre-commit --with pre-commit-hooks
+uv tool list
+uv tool upgrade --all
+uv tool uninstall ruff</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Where do tools live?</h3>
+        <ul>
+          <li>Each tool gets an isolated venv under <code>~/.local/share/uv/tools/</code></li>
+          <li>Console scripts get symlinked into <code>~/.local/bin</code> (configurable via <code>UV_TOOL_BIN_DIR</code>)</li>
+          <li>Add that dir to <code>PATH</code> with: <code>uv tool update-shell</code></li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b"><code>uvx</code> vs <code>uv tool install</code></h3>
+        <table>
+          <thead><tr><th></th><th>uvx</th><th>uv tool install</th></tr></thead>
+          <tbody>
+            <tr><td>Install location</td><td>tmp / cache</td><td>persistent</td></tr>
+            <tr><td>On PATH</td><td>no</td><td>yes</td></tr>
+            <tr><td>Best for</td><td>occasional use</td><td>daily drivers</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Tip</h3>
+        <p>Use <code>uvx</code> in CI pre-commit jobs. It avoids polluting the build venv and is faster than <code>pip install --no-deps pre-commit</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 17 — WORKSPACES ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">16</span>
+    <h2>Workspaces — Cargo for Python</h2>
+  </div>
+  <p>A <span class="a">workspace</span> is a multi-package repo with one shared lockfile, one shared venv, and one resolution pass. Mirrors Cargo / pnpm workspaces.</p>
+  <div class="cols cols-2" style="margin-top:0.5em;">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Layout</h3>
+        <pre><code>repo/
+├── pyproject.toml           # workspace root
+├── uv.lock                  # ONE lockfile
+├── apps/
+│   ├── api/
+│   │   └── pyproject.toml
+│   └── worker/
+│       └── pyproject.toml
+└── libs/
+    ├── core/
+    │   └── pyproject.toml
+    └── adapters/
+        └── pyproject.toml</code></pre>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Root <code>pyproject.toml</code></h3>
+        <pre><code>[tool.uv.workspace]
+members = ["apps/*", "libs/*"]
+exclude = ["apps/legacy"]
+
+[tool.uv.sources]
+core      = { workspace = true }
+adapters  = { workspace = true }</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Cross-package deps</h3>
+        <pre><code># apps/api/pyproject.toml
+[project]
+name = "api"
+dependencies = [
+  "core",        # path-resolved via workspace
+  "adapters",
+  "fastapi&gt;=0.115",
+]
+
+[tool.uv.sources]
+core     = { workspace = true }
+adapters = { workspace = true }</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Operations</h3>
+        <pre><code># sync everything
+uv sync
+
+# scope to a member
+uv sync --package api
+uv run --package api uvicorn api.main:app
+
+# add a dep to one member
+uv add --package worker celery</code></pre>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Why bother?</h3>
+        <p>Editable cross-package deps without manual <code>pip install -e</code> juggling. Refactor across apps and libs with one resolve.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 18 — DEP GROUPS ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">17</span>
+    <h2>Dependency Groups &amp; Optional Extras</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Dependency groups (PEP 735)</h3>
+        <p>Internal-only groups for dev tooling, docs, profiling — never installed by your users.</p>
+        <pre><code>[dependency-groups]
+dev      = ["pytest&gt;=8", "ruff&gt;=0.6"]
+docs     = ["mkdocs&gt;=1.6", "mkdocs-material"]
+profile  = ["py-spy", "memray"]
+typing   = ["mypy&gt;=1.10",
+            "types-requests"]
+
+# include another group inside one
+test     = [{ include-group = "dev" },
+            "pytest-asyncio"]</code></pre>
+        <pre><code>uv sync --group dev
+uv sync --group dev --group typing
+uv sync --all-groups
+uv run --group test pytest</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Optional extras (legacy PEP 621)</h3>
+        <p>Public flags your users opt into when installing your package.</p>
+        <pre><code>[project.optional-dependencies]
+postgres = ["asyncpg&gt;=0.29"]
+redis    = ["redis&gt;=5"]
+all      = ["my-app[postgres,redis]"]</code></pre>
+        <pre><code># consumer
+pip install my-app[postgres]
+uv pip install 'my-app[postgres,redis]'</code></pre>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Groups vs extras — when to use which</h3>
+        <table>
+          <thead><tr><th></th><th>Groups</th><th>Extras</th></tr></thead>
+          <tbody>
+            <tr><td>Visible to users</td><td>no</td><td>yes</td></tr>
+            <tr><td>Use case</td><td>dev tooling</td><td>opt-in features</td></tr>
+            <tr><td>Standard</td><td>PEP 735</td><td>PEP 621</td></tr>
+            <tr><td>Cmd</td><td><code>uv sync --group X</code></td><td><code>uv sync --extra X</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 19 — BUILD & PUBLISH ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">18</span>
+    <h2>Build &amp; Publish</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Build wheels &amp; sdists</h3>
+        <pre><code># build into ./dist/
+uv build
+
+# only one format
+uv build --wheel
+uv build --sdist
+
+# specify a workspace member
+uv build --package my-lib
+
+# inspect
+unzip -l dist/my_lib-0.1.0-py3-none-any.whl</code></pre>
+        <p style="margin-top:.3em;">Replaces <code>python -m build</code>. Reads the <code>build-system</code> table from <code>pyproject.toml</code> — Hatchling, setuptools, maturin (Rust extensions), all work.</p>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Publish to PyPI</h3>
+        <pre><code>uv publish                            # uses ~/.pypirc
+uv publish --token "$PYPI_TOKEN"
+uv publish --publish-url https://test.pypi.org/legacy/</code></pre>
+        <p>Replaces <code>twine</code>. Supports trusted publishing (OIDC) from GitHub Actions — no token to manage.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">GitHub Actions: trusted publish</h3>
+        <pre><code>name: Publish
+on:
+  release:
+    types: [published]
+permissions:
+  id-token: write   # OIDC for PyPI
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - run: uv build
+      - run: uv publish --trusted-publishing automatic</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Bumping a version</h3>
+        <pre><code>uv version 1.2.0
+uv version --bump patch
+uv version --bump minor
+uv version --bump major</code></pre>
+        <p>Edits <code>pyproject.toml</code> &amp; refreshes the lock — commit the diff and tag.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 20 — PERFORMANCE INTERNALS ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">19</span>
+    <h2>Performance Internals</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">The global cache</h3>
+        <ul>
+          <li>One content-addressed store at <code>~/.cache/uv/</code> (Linux/macOS) or <code>%LOCALAPPDATA%\uv\cache</code></li>
+          <li>Wheels, sdists, source builds, metadata — keyed by hash, deduplicated across projects</li>
+          <li>Building NumPy from source once means every other venv on the machine gets it for free</li>
+          <li>Inspect: <code>uv cache dir</code>, <code>uv cache prune</code>, <code>uv cache clean</code></li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Hardlinks &amp; reflinks</h3>
+        <ul>
+          <li>Default <code>UV_LINK_MODE=hardlink</code> — venv files are filesystem links into the cache</li>
+          <li>On btrfs/APFS: <code>--link-mode=reflink</code> (copy-on-write)</li>
+          <li>Forced full copies: <code>--link-mode=copy</code> (Docker volumes, NFS)</li>
+          <li>Symlinks for dev: <code>--link-mode=symlink</code></li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">PubGrub resolver</h3>
+        <ul>
+          <li>SAT-style algorithm with conflict-driven clause learning — same family as Dart pub, npm, Cargo</li>
+          <li>Reports human-readable conflicts: "<em>fastapi 0.115 requires pydantic ≥ 2, but my-lib pins pydantic ≤ 1</em>"</li>
+          <li>Pre-fetches metadata over HTTP/2 in parallel from PyPI's JSON API</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Tunables (env vars)</h3>
+        <pre><code>UV_CACHE_DIR=/big/disk/uv-cache
+UV_LINK_MODE=copy
+UV_HTTP_TIMEOUT=120
+UV_CONCURRENT_DOWNLOADS=20
+UV_NO_CACHE=1
+UV_OFFLINE=1
+UV_INDEX_URL=https://internal/simple
+UV_NATIVE_TLS=1</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 21 — COMPARISON ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">20</span>
+    <h2>uv vs pip / Poetry / pdm / Hatch</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <table>
+        <thead><tr><th>Capability</th><th>pip</th><th>Poetry</th><th>pdm</th><th>Hatch</th><th>uv</th></tr></thead>
+        <tbody>
+          <tr><td>Install / uninstall</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Lockfile</td><td>—</td><td>✅</td><td>✅</td><td>—</td><td>✅</td></tr>
+          <tr><td>Universal lock</td><td>—</td><td>partial</td><td>✅</td><td>—</td><td>✅</td></tr>
+          <tr><td>Workspaces</td><td>—</td><td>—</td><td>partial</td><td>—</td><td>✅</td></tr>
+          <tr><td>Manage Python</td><td>—</td><td>—</td><td>partial</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Build / publish</td><td>—</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+          <tr><td>PEP 723 scripts</td><td>—</td><td>—</td><td>partial</td><td>✅</td><td>✅</td></tr>
+          <tr><td>Run CLIs (pipx)</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅</td></tr>
+          <tr><td>Single binary</td><td>—</td><td>—</td><td>—</td><td>—</td><td>✅</td></tr>
+          <tr><td>Resolver speed</td><td>slow</td><td>slow</td><td>medium</td><td>medium</td><td><span class="g">very fast</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="card amber">
+        <h3 class="a">Verdicts</h3>
+        <ul>
+          <li><span class="a">pip</span> — still the floor, fine for one-off venvs</li>
+          <li><span class="g">Poetry</span> — mature, opinionated, slow resolver, no Python management</li>
+          <li><span class="p">pdm</span> — closest spiritual ancestor of uv; smaller ecosystem</li>
+          <li><span class="b">Hatch</span> — strong on builds + matrices, weaker on locking</li>
+          <li><span class="r">uv</span> — covers all of the above, faster, single binary</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">When NOT to use uv</h3>
+        <ul>
+          <li>Conda-only stacks (geosciences, some ML) — use pixi or stick with conda</li>
+          <li>Legacy projects without <code>pyproject.toml</code> — use <code>uv pip</code> only</li>
+          <li>Air-gapped envs that can't pre-cache wheels — needs care, but doable with <code>UV_OFFLINE=1</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 22 — MIGRATING FROM PIP ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">21</span>
+    <h2>Migrating from pip / requirements.txt</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Stage 1 — drop-in (no project changes)</h3>
+        <pre><code># nothing to change in the repo, just:
+alias pip='uv pip'
+
+uv pip install -r requirements.txt
+uv pip compile requirements.in -o requirements.txt
+uv pip sync requirements.txt</code></pre>
+        <p>Useful for proving uv works in your CI before any rewrite.</p>
+      </div>
+      <div class="card green" style="margin-top:0.4em;">
+        <h3 class="g">Stage 2 — add a pyproject.toml</h3>
+        <pre><code># interactive, infers from cwd
+uv init --name my-app .
+
+# import the existing requirements
+xargs -a requirements.txt uv add</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card purple">
+        <h3 class="p">Stage 3 — produce uv.lock and delete the old file</h3>
+        <pre><code>uv lock
+git add pyproject.toml uv.lock
+git rm requirements.txt requirements.in
+
+# CI now does
+uv sync --frozen --no-dev</code></pre>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Keep <code>requirements.txt</code> for downstream consumers</h3>
+        <pre><code># export from the lock for tools that
+# can't read uv.lock yet
+uv export --format requirements-txt \
+  --no-dev --no-hashes \
+  -o requirements.txt</code></pre>
+        <p>Useful for AWS Lambda, legacy Docker base images, IDE remote interpreters, vendor security scanners.</p>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">Don't</h3>
+        <p>Don't keep both <code>requirements.txt</code> and <code>uv.lock</code> as sources of truth. Pick one. Export <em>from</em> the lock; never edit a generated requirements file by hand.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 23 — MIGRATING FROM POETRY ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">22</span>
+    <h2>Migrating from Poetry</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">What changes</h3>
+        <table>
+          <thead><tr><th>Poetry</th><th>uv</th></tr></thead>
+          <tbody>
+            <tr><td><code>poetry install</code></td><td><code>uv sync</code></td></tr>
+            <tr><td><code>poetry add X</code></td><td><code>uv add X</code></td></tr>
+            <tr><td><code>poetry remove X</code></td><td><code>uv remove X</code></td></tr>
+            <tr><td><code>poetry lock</code></td><td><code>uv lock</code></td></tr>
+            <tr><td><code>poetry run X</code></td><td><code>uv run X</code></td></tr>
+            <tr><td><code>poetry shell</code></td><td><code>source .venv/bin/activate</code></td></tr>
+            <tr><td><code>poetry build / publish</code></td><td><code>uv build / uv publish</code></td></tr>
+            <tr><td><code>[tool.poetry]</code></td><td><code>[project]</code> + <code>[tool.uv]</code></td></tr>
+            <tr><td><code>poetry.lock</code></td><td><code>uv.lock</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">The <code>[tool.poetry]</code> rewrite</h3>
+        <pre><code># before
+[tool.poetry]
+name = "svc"
+version = "1.2.3"
+authors = ["You &lt;you@x.com&gt;"]
+[tool.poetry.dependencies]
+python   = "^3.12"
+fastapi  = "^0.115"
+[tool.poetry.group.dev.dependencies]
+pytest = "^8"
+
+# after
+[project]
+name = "svc"
+version = "1.2.3"
+requires-python = "&gt;=3.12,&lt;3.14"
+authors = [{name = "You",
+            email = "you@x.com"}]
+dependencies = ["fastapi&gt;=0.115,&lt;1"]
+
+[dependency-groups]
+dev = ["pytest&gt;=8"]</code></pre>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Caret → SemVer specifiers</h3>
+        <ul>
+          <li>Poetry's <code>^1.2.3</code> → uv's <code>&gt;=1.2.3,&lt;2</code></li>
+          <li>Poetry's <code>~1.2.3</code> → uv's <code>~=1.2.3</code> (compatible release)</li>
+          <li><code>poetry-plugin-export</code> → <code>uv export --format requirements-txt</code></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 24 — CONFIGURATION ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">23</span>
+    <h2>Configuration — pyproject.toml &amp; uv.toml</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">[tool.uv] section</h3>
+        <pre><code>[tool.uv]
+# install the project itself in editable mode
+package = true
+
+# always sync these groups by default
+default-groups = ["dev"]
+
+# constrain Python versions for the lock
+python-preference = "managed"
+required-version  = "&gt;=0.5"
+
+# index configuration
+index-strategy = "unsafe-best-match"
+prerelease     = "if-necessary"
+
+# resolve only certain platforms
+[tool.uv.environments]
+linux-x86 = "platform_system == 'Linux' and platform_machine == 'x86_64'"
+
+# private indexes
+[[tool.uv.index]]
+name     = "internal"
+url      = "https://pkg.acme.com/simple"
+priority = "supplemental"
+explicit = true
+
+[tool.uv.sources]
+mylib = { index = "internal" }</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">User-level <code>uv.toml</code></h3>
+        <p>Same keys, no <code>[tool.uv]</code> prefix. Lives at <code>~/.config/uv/uv.toml</code>:</p>
+        <pre><code>cache-dir   = "/big/disk/uv-cache"
+link-mode   = "copy"
+python-preference = "only-managed"
+
+[[index]]
+name = "company"
+url  = "https://pkg.acme.com/simple"</code></pre>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Resolution order</h3>
+        <ol>
+          <li>Command-line flags</li>
+          <li>Environment variables (<code>UV_*</code>)</li>
+          <li>Project <code>pyproject.toml [tool.uv]</code></li>
+          <li>User <code>~/.config/uv/uv.toml</code></li>
+          <li>Built-in defaults</li>
+        </ol>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">.env / shell rc snippets</h3>
+        <pre><code>export UV_LINK_MODE=copy
+export UV_PYTHON_PREFERENCE=only-managed
+export UV_TOOL_BIN_DIR="$HOME/.local/bin"</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 25 — CI PATTERNS ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">24</span>
+    <h2>CI Patterns — GitHub Actions</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Minimal CI workflow</h3>
+        <pre><code>name: CI
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.5.4"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - run: uv python install ${{ matrix.python }}
+      - run: uv sync --frozen --all-groups
+      - run: uv run ruff check .
+      - run: uv run mypy src/
+      - run: uv run pytest -q --cov</code></pre>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Why <code>setup-uv@v3</code></h3>
+        <ul>
+          <li>Caches <code>~/.cache/uv</code> keyed on <code>uv.lock</code></li>
+          <li>Pins the uv version in one place</li>
+          <li>Adds <code>uv</code> &amp; <code>uvx</code> to <code>PATH</code></li>
+          <li>Restores between matrix legs automatically</li>
+        </ul>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Speed-ups</h3>
+        <ul>
+          <li><code>UV_COMPILE_BYTECODE=1</code> — pre-compile <code>.pyc</code> at install time, faster cold start in tests</li>
+          <li><code>uv sync --frozen</code> instead of <code>uv lock &amp;&amp; uv sync</code></li>
+          <li>Re-use the same job's venv between steps — no need to rebuild</li>
+          <li>Skip <code>actions/setup-python</code> entirely; <code>uv python install</code> is faster</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Lock-drift gate</h3>
+        <pre><code>- run: uv lock --check
+  # fails if pyproject.toml changed
+  # without re-locking</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 26 — CHEAT SHEET ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">25</span>
+    <h2>Cheat Sheet — Daily Commands</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <table>
+        <thead><tr><th>Task</th><th>Command</th></tr></thead>
+        <tbody>
+          <tr><td>Start a project</td><td><code>uv init my-app</code></td></tr>
+          <tr><td>Add a dep</td><td><code>uv add httpx</code></td></tr>
+          <tr><td>Add dev dep</td><td><code>uv add --group dev pytest</code></td></tr>
+          <tr><td>Remove dep</td><td><code>uv remove httpx</code></td></tr>
+          <tr><td>Sync env</td><td><code>uv sync</code></td></tr>
+          <tr><td>Run a script</td><td><code>uv run python main.py</code></td></tr>
+          <tr><td>Run tests</td><td><code>uv run pytest</code></td></tr>
+          <tr><td>Run a one-off CLI</td><td><code>uvx ruff check .</code></td></tr>
+          <tr><td>Install a CLI globally</td><td><code>uv tool install pre-commit</code></td></tr>
+          <tr><td>Pin a Python</td><td><code>uv python pin 3.12</code></td></tr>
+          <tr><td>Re-lock w/ upgrade</td><td><code>uv lock --upgrade</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Task</th><th>Command</th></tr></thead>
+        <tbody>
+          <tr><td>Reproducible install</td><td><code>uv sync --frozen</code></td></tr>
+          <tr><td>Production install</td><td><code>uv sync --frozen --no-dev</code></td></tr>
+          <tr><td>Build wheels</td><td><code>uv build</code></td></tr>
+          <tr><td>Publish to PyPI</td><td><code>uv publish</code></td></tr>
+          <tr><td>Bump version</td><td><code>uv version --bump patch</code></td></tr>
+          <tr><td>Export to req.txt</td><td><code>uv export -o req.txt</code></td></tr>
+          <tr><td>Inspect dep tree</td><td><code>uv tree</code></td></tr>
+          <tr><td>Why is X here?</td><td><code>uv tree --invert --package X</code></td></tr>
+          <tr><td>Outdated deps</td><td><code>uv tree --outdated</code></td></tr>
+          <tr><td>Cache dir</td><td><code>uv cache dir</code></td></tr>
+          <tr><td>Clean cache</td><td><code>uv cache prune</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 27 — GOTCHAS ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">26</span>
+    <h2>Gotchas &amp; Troubleshooting</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">Hardlink errors across volumes</h3>
+        <p>Docker bind mounts and NFS often refuse hardlinks: <code>error: Failed to create hard link</code>.</p>
+        <pre><code># fix
+export UV_LINK_MODE=copy</code></pre>
+      </div>
+      <div class="card green" style="margin-top:0.3em;">
+        <h3 class="g">"requires-python" mismatch in CI</h3>
+        <p>Lock was made for <code>&gt;=3.12</code> but CI is on 3.11. Either bump CI Python (preferred) or relax <code>requires-python</code>.</p>
+      </div>
+      <div class="card purple" style="margin-top:0.3em;">
+        <h3 class="p">Private index 401 in CI</h3>
+        <pre><code>[[tool.uv.index]]
+name = "internal"
+url  = "https://pkg.acme.com/simple"
+
+# in CI
+UV_INDEX_INTERNAL_USERNAME=ci
+UV_INDEX_INTERNAL_PASSWORD=$TOKEN</code></pre>
+        <p>uv reads <code>UV_INDEX_&lt;NAME&gt;_USERNAME / _PASSWORD</code>.</p>
+      </div>
+    </div>
+    <div>
+      <div class="card blue">
+        <h3 class="b">PyTorch &amp; CUDA wheels</h3>
+        <pre><code>[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu124",
+    marker = "platform_system != 'Darwin'" },
+  { index = "pypi",
+    marker = "platform_system == 'Darwin'" },
+]
+
+[[tool.uv.index]]
+name     = "pytorch-cu124"
+url      = "https://download.pytorch.org/whl/cu124"
+explicit = true</code></pre>
+      </div>
+      <div class="card red" style="margin-top:0.3em;">
+        <h3 class="r">"Cache is huge"</h3>
+        <pre><code>uv cache dir
+uv cache prune          # safe — keeps recent
+uv cache clean          # nuke everything</code></pre>
+      </div>
+      <div class="card amber" style="margin-top:0.3em;">
+        <h3 class="a">Editable install of the project itself</h3>
+        <p>If you want <code>import myapp</code> to work after <code>uv sync</code>, add:</p>
+        <pre><code>[tool.uv]
+package = true</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════ SLIDE 28 — SUMMARY ═══════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">27</span>
+    <h2>Summary &amp; Next Steps</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3 class="a">What we covered</h3>
+        <ul>
+          <li>uv as the all-in-one Python toolchain</li>
+          <li><code>uv pip</code> as the drop-in path; <code>uv add</code> as the project path</li>
+          <li>Universal multi-platform <code>uv.lock</code></li>
+          <li><code>uv sync</code> &amp; <code>uv run</code> for everyday work</li>
+          <li>Managing Pythons, PEP 723 scripts, and <code>uvx</code> tools</li>
+          <li>Workspaces, dep groups, build &amp; publish</li>
+          <li>Performance internals — cache, hardlinks, PubGrub</li>
+          <li>Migration from pip-tools and Poetry</li>
+          <li>CI patterns &amp; gotchas</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:0.4em;">
+        <h3 class="b">Further reading</h3>
+        <p>docs.astral.sh/uv · github.com/astral-sh/uv · python-build-standalone — github.com/indygreg/python-build-standalone · PEP 723 — peps.python.org/pep-0723 · PEP 735 — peps.python.org/pep-0735</p>
+      </div>
+    </div>
+    <div>
+      <div class="card green">
+        <h3 class="g">Recommended next steps</h3>
+        <ol style="padding-left:1.2em;">
+          <li>Install uv and run <code>uv pip</code> against an existing project</li>
+          <li>Convert one repo with <code>uv init .</code> + <code>uv add</code></li>
+          <li>Replace <code>actions/setup-python</code> with <code>astral-sh/setup-uv</code></li>
+          <li>Pick one ops script, give it a PEP 723 header, ship it</li>
+          <li>Move dev tools (<code>ruff</code>, <code>pre-commit</code>) under <code>uv tool install</code></li>
+          <li>For monorepos: try <code>[tool.uv.workspace]</code></li>
+        </ol>
+      </div>
+      <div class="card purple" style="margin-top:0.4em;">
+        <h3 class="p">Companion deck</h3>
+        <p>For Docker, multi-stage builds, GPU/PyTorch recipes, monorepo workflows, and migration playbooks see <span class="a">"uv in Practice"</span>.</p>
+      </div>
+      <div class="card red" style="margin-top:0.4em;">
+        <h3 class="r">One-line takeaway</h3>
+        <p>If you're still typing <code>python -m venv</code>, <code>pip install -r</code>, or <code>poetry install</code> — try <code>uv sync</code> once. You won't go back.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+</div><!-- /.slides -->
+</div><!-- /.reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1100,
+  height: 900,
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
+});
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
+</script>
+</body>
+</html>
